@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class WaitingController {
 
     @PostMapping
     public ResponseEntity<WaitingResponse> createWaiting(@LoginMember LoginMemberInfo loginMemberInfo,
-                                                         @RequestBody CreateWaitingRequest createWaitingRequest) {
+                                                         @Valid @RequestBody CreateWaitingRequest createWaitingRequest) {
         WaitingResult waitingresult = waitingService.create(createWaitingRequest.toServiceParam(loginMemberInfo.id()));
         return ResponseEntity.status(HttpStatus.CREATED).body(WaitingResponse.from(waitingresult));
     }
