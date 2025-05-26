@@ -32,6 +32,10 @@ public class Member {
         return new Member(null, name, role, email, password);
     }
 
+    public boolean isSameId(Long id) {
+        return Objects.equals(this.id, id);
+    }
+
     public Long getId() {
         return id;
     }

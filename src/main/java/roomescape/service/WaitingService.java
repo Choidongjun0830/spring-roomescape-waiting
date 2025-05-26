@@ -10,7 +10,6 @@ import roomescape.service.result.WaitingWithRankResult;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Transactional(readOnly = true)
@@ -46,7 +45,7 @@ public class WaitingService {
     public WaitingResult create(CreateWaitingParam createWaitingParam) {
         ReservationTime reservationTime = getReservationTimeFromRepository(createWaitingParam.timeId());
         Theme theme = getThemeFromRepository(createWaitingParam.themeId());
-        Member member = getMemberFromRepository(createWaitingParam);
+        Member member = getMemberFromRepository(createWaitingParam.memberId());
 
         LocalDate date = createWaitingParam.date();
         validateDuplicateWaiting(member, date, reservationTime, theme);
@@ -64,19 +63,15 @@ public class WaitingService {
 
     @Transactional
     public void deleteByMemberIdAndWaitingId(Long memberId, Long waitingId) {
-        Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(
-                () -> new NotFoundWaitingException(waitingId + "에 해당하는 정보가 없습니다."));
-        if(!Objects.equals(waiting.getMember().getId(), memberId)) {
-            throw new DeletionNotAllowedException("잘못된 삭제 요청입니다.");
-        }
+        Waiting waiting = getWaitingFromRepository(waitingId);
+        validateWaitingBelongsToMember(memberId, waiting);
 
         waitingRepository.deleteById(waitingId);
     }
 
     @Transactional
     public void approve(final Long waitingId) {
-        Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(
-                () -> new NotFoundWaitingException(waitingId + "에 해당하는 정보가 없습니다."));
+        Waiting waiting = getWaitingFromRepository(waitingId);
 
         Reservation newReservation = Reservation.createNew(
                 waiting.getMember(),
@@ -115,19 +110,29 @@ public class WaitingService {
         }
     }
 
-    private Theme getThemeFromRepository(final Long themeId) {
+    private void validateWaitingBelongsToMember(final Long memberId, final Waiting waiting) {
+        if(!waiting.getMember().isSameId(memberId)) {
+            throw new DeletionNotAllowedException("잘못된 삭제 요청입니다.");
+        }
+    }
+
+    private Theme getThemeFromRepository(Long themeId) {
         return themeRepository.findById(themeId).orElseThrow(
                 () -> new NotFoundThemeException(themeId + "에 해당하는 정보가 없습니다."));
     }
 
-    private ReservationTime getReservationTimeFromRepository(final Long createWaitingParam) {
-        return reservationTimeRepository.findById(createWaitingParam).orElseThrow(
-                () -> new NotFoundReservationTimeException(createWaitingParam + "에 해당하는 정보가 없습니다."));
+    private ReservationTime getReservationTimeFromRepository(Long timeId) {
+        return reservationTimeRepository.findById(timeId).orElseThrow(
+                () -> new NotFoundReservationTimeException(timeId + "에 해당하는 정보가 없습니다."));
     }
 
-    private Member getMemberFromRepository(final CreateWaitingParam createWaitingParam) {
-        Member member = memberRepository.findById(createWaitingParam.memberId()).orElseThrow(
-                () -> new NotFoundMemberException(createWaitingParam.memberId() + "에 해당하는 정보가 없습니다."));
-        return member;
+    private Member getMemberFromRepository(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(
+                () -> new NotFoundMemberException(memberId + "에 해당하는 정보가 없습니다."));
+    }
+
+    private Waiting getWaitingFromRepository(final Long waitingId) {
+        return waitingRepository.findById(waitingId).orElseThrow(
+                () -> new NotFoundWaitingException(waitingId + "에 해당하는 정보가 없습니다."));
     }
 }
