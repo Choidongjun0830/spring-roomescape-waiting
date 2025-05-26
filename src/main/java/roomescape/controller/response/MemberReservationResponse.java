@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public record MemberReservationResponse(Long id,
@@ -47,6 +48,7 @@ public record MemberReservationResponse(Long id,
 
         results.addAll(reservations);
         results.addAll(waitings);
+        results.sort(Comparator.comparing(MemberReservationResponse::date).thenComparing(MemberReservationResponse::time));
         return Collections.unmodifiableList(results);
     }
 }
