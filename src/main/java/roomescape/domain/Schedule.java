@@ -4,6 +4,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.ManyToOne;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Embeddable
 public class Schedule {
@@ -36,5 +37,16 @@ public class Schedule {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (!(o instanceof Schedule schedule)) return false;
+        return Objects.equals(date, schedule.date) && Objects.equals(time, schedule.time) && Objects.equals(theme, schedule.theme);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, time, theme);
     }
 }

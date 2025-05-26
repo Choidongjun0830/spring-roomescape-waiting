@@ -70,13 +70,12 @@ public class Waiting {
 
     @Override
     public boolean equals(final Object o) {
-        if (!(o instanceof Waiting)) return false;
-        Waiting waiting = (Waiting) o;
-        return Objects.equals(id, waiting.id) && Objects.equals(member, waiting.member) && Objects.equals(schedule, waiting.schedule) && Objects.equals(createdAt, waiting.createdAt);
+        if (!(o instanceof Waiting waiting)) return false;
+        return Objects.equals(id, waiting.id) && Objects.equals(member, waiting.member) && Objects.equals(schedule, waiting.schedule);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, schedule, createdAt);
+        return Objects.hash(id, member, schedule);
     }
 }
