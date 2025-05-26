@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.TestFixture;
 import roomescape.domain.*;
 import roomescape.exception.DeletionNotAllowedException;
@@ -17,6 +18,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static roomescape.TestFixture.TEST_DATE;
 
 @SpringBootTest
@@ -24,7 +28,7 @@ import static roomescape.TestFixture.TEST_DATE;
 @Transactional
 class WaitingServiceTest {
 
-    @Autowired
+    @MockitoSpyBean
     private WaitingService waitingService;
 
     @Autowired
@@ -132,6 +136,7 @@ class WaitingServiceTest {
     }
 
     @Test
+    @DisplayName("예약 대기를 승인할 수 있다.")
     void approve() {
         //given
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
@@ -146,7 +151,8 @@ class WaitingServiceTest {
     }
 
     @Test
-    void approveFirst() {
+    @DisplayName("예약의 첫번쨰 대기를 승인할 수 있다.")
+    void approveFirst1() {
         //given
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
@@ -160,6 +166,19 @@ class WaitingServiceTest {
     }
 
     @Test
+    @DisplayName("예약 대기가 없을 경우 approve가 호출되지 않는다.")
+    void approveFirst2() {
+        //given
+        Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+        ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
+
+        //when & then
+        waitingService.approveFirst(theme.getId(), TestFixture.TEST_DATE, reservationTime.getId());
+        verify(waitingService, never()).approve(any(Long.class));
+    }
+
+    @Test
+    @DisplayName("예약 대기를 Id로 삭제할 수 있다.")
     void deleteById() {
         //given
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());

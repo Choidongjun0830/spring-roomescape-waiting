@@ -88,8 +88,10 @@ public class WaitingService {
         Theme theme = getThemeFromRepository(themeId);
 
         List<Waiting> waitings = waitingRepository.findByScheduleOrderByCreatedAt(new Schedule(date, reservationTime, theme));
-        Waiting firstWaiting = waitings.getFirst();
-        approve(firstWaiting.getId());
+        if(waitings.isEmpty()) {
+            return;
+        }
+        approve(waitings.getFirst().getId());
     }
 
     @Transactional
