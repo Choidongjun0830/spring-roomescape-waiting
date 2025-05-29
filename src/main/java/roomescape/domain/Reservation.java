@@ -48,6 +48,10 @@ public class Reservation {
         return schedule.getDate();
     }
 
+    public Schedule getSchedule() {
+        return schedule;
+    }
+
     public ReservationTime getTime() {
         return schedule.getTime();
     }

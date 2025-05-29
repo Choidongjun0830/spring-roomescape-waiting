@@ -113,8 +113,7 @@ class ReservationControllerTest {
         // given
         ReservationResult reservationResult = TestFixture.createDefaultReservationResult();
         when(reservationService.findById(TestFixture.TEST_RESERVATION_ID)).thenReturn(reservationResult);
-        doNothing().when(reservationService).deleteById(TestFixture.TEST_RESERVATION_ID);
-        doNothing().when(waitingService).approveFirst(TestFixture.TEST_THEME_ID, TestFixture.TEST_DATE, TestFixture.TEST_TIME_ID);
+        doNothing().when(reservationService).deleteByIdAndApproveFirstWaiting(TestFixture.TEST_RESERVATION_ID);
 
         // when & then
         mockMvc.perform(delete("/reservations/" + TestFixture.TEST_RESERVATION_ID)

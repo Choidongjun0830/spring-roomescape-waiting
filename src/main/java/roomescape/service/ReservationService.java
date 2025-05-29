@@ -20,22 +20,25 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository, final MemberRepository memberRepository, final ThemeRepository themeRepository, final ReservationTimeRepository reservationTimeRepository) {
+    public ReservationService(ReservationRepository reservationRepository,
+                              MemberRepository memberRepository,
+                              ThemeRepository themeRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
         this.themeRepository = themeRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
     public ReservationResult create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(createReservationParam.timeId()).orElseThrow(
-                () -> new NotFoundReservationTimeException(createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
-        Theme theme = themeRepository.findById(createReservationParam.themeId()).orElseThrow(
-                () -> new NotFoundThemeException(createReservationParam.themeId() + "에 해당하는 정보가 없습니다."));
-        Member member = memberRepository.findById(createReservationParam.memberId()).orElseThrow(
-                () -> new NotFoundMemberException(createReservationParam.memberId() + "에 해당하는 정보가 없습니다."));
+        ReservationTime reservationTime = getReservationTimeFromRepository(createReservationParam.timeId());
+        Theme theme = getThemeFromRepository(createReservationParam.themeId());
+        Member member = getMemberFromRepository(createReservationParam.memberId());
 
         validateDuplicateReservation(createReservationParam, reservationTime, theme);
         validateReservationDateTime(createReservationParam, currentDateTime, reservationTime);
@@ -46,8 +49,14 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(Long reservationId) {
+    public void deleteByIdAndApproveFirstWaiting(Long reservationId) {
+        Reservation reservation = getReservationFromRepository(reservationId);
         reservationRepository.deleteById(reservationId);
+        Schedule schedule = reservation.getSchedule();
+        Waiting waiting = getWaitingFromRepository(schedule);
+
+        Reservation newReservation = Reservation.createNew(waiting.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        reservationRepository.save(newReservation);
     }
 
     public List<ReservationResult> findAll() {
@@ -73,6 +82,31 @@ public class ReservationService {
     public List<ReservationResult> findReservationsByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
         return ReservationResult.from(reservations);
+    }
+
+    private Waiting getWaitingFromRepository(final Schedule schedule) {
+        return waitingRepository.findTopByScheduleOrderByCreatedAt(schedule)
+                .orElseThrow(() -> new NotFoundWaitingException("해당하는 예약 대기를 찾을 수 없습니다."));
+    }
+
+    private Reservation getReservationFromRepository(Long reservationId) {
+        return reservationRepository.findById(reservationId).orElseThrow(
+                () -> new NotFoundReservationException(reservationId + "에 해당하는 정보가 없습니다."));
+    }
+
+    private Member getMemberFromRepository(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(
+                () -> new NotFoundWaitingException(memberId + "에 해당하는 멤버 정보가 없습니다."));
+    }
+
+    private ReservationTime getReservationTimeFromRepository(Long reservationTimeId) {
+        return reservationTimeRepository.findById(reservationTimeId).orElseThrow(
+                () -> new NotFoundReservationTimeException(reservationTimeId + "에 해당하는 시간 정보가 없습니다."));
+    }
+
+    private Theme getThemeFromRepository(Long themeId) {
+        return themeRepository.findById(themeId).orElseThrow(
+                () -> new NotFoundThemeException(themeId + "에 해당하는 테마 정보가 없습니다."));
     }
 
     private void validateDuplicateReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {

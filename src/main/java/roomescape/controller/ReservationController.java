@@ -53,9 +53,7 @@ public class ReservationController {
 
     @DeleteMapping("/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("reservationId") Long reservationId) {
-        ReservationResult reservationResult = reservationService.findById(reservationId);
-        reservationService.deleteById(reservationId);
-        waitingService.approveFirst(reservationResult.theme().id(), reservationResult.date(), reservationResult.time().id());
+        reservationService.deleteByIdAndApproveFirstWaiting(reservationId);
         return ResponseEntity.noContent().build();
     }
 

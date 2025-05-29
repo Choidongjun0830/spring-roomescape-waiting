@@ -10,17 +10,16 @@ import roomescape.service.result.WaitingWithRankResult;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
-    private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
 
     public WaitingService(MemberRepository memberRepository,
                           ThemeRepository themeRepository,
@@ -81,18 +80,6 @@ public class WaitingService {
                 waiting.getSchedule().getTheme());
         reservationRepository.save(newReservation);
         waitingRepository.deleteById(waitingId);
-    }
-
-    @Transactional
-    public void approveFirst(Long themeId, LocalDate date, Long timeId) {
-        ReservationTime reservationTime = getReservationTimeFromRepository(timeId);
-        Theme theme = getThemeFromRepository(themeId);
-
-        Optional<Waiting> topWaiting = waitingRepository.findTopByScheduleOrderByCreatedAt(new Schedule(date, reservationTime, theme));
-        if(topWaiting.isEmpty()) {
-            return;
-        }
-        approve(topWaiting.get().getId());
     }
 
     @Transactional

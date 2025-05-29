@@ -18,9 +18,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static roomescape.TestFixture.TEST_DATE;
 
 @SpringBootTest
@@ -148,33 +145,6 @@ class WaitingServiceTest {
         assertThatCode(
                 () -> waitingService.approve(waiting.getId())
         ).doesNotThrowAnyException();
-    }
-
-    @Test
-    @DisplayName("예약의 첫번쨰 대기를 승인할 수 있다.")
-    void approveFirst1() {
-        //given
-        Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
-        ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
-        Member member = memberRepository.save(TestFixture.createDefaultMember());
-        Waiting waiting = waitingRepository.save(TestFixture.createWaiting(member, TEST_DATE, reservationTime, theme));
-
-        //when & then
-        assertThatCode(
-                () -> waitingService.approveFirst(theme.getId(), TestFixture.TEST_DATE, reservationTime.getId())
-        ).doesNotThrowAnyException();
-    }
-
-    @Test
-    @DisplayName("예약 대기가 없을 경우 approve가 호출되지 않는다.")
-    void approveFirst2() {
-        //given
-        Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
-        ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
-
-        //when & then
-        waitingService.approveFirst(theme.getId(), TestFixture.TEST_DATE, reservationTime.getId());
-        verify(waitingService, never()).approve(any(Long.class));
     }
 
     @Test
