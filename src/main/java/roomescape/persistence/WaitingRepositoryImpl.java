@@ -54,7 +54,7 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public List<Waiting> findByScheduleOrderByCreatedAt(Schedule schedule) {
-        return jpaWaitingRepository.findByScheduleOrderByCreatedAt(schedule);
+    public Optional<Waiting> findTopByScheduleOrderByCreatedAt(Schedule schedule) {
+        return jpaWaitingRepository.findTopByScheduleOrderByCreatedAt(schedule);
     }
 }

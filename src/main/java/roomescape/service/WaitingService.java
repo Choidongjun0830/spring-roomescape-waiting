@@ -10,6 +10,7 @@ import roomescape.service.result.WaitingWithRankResult;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -87,11 +88,11 @@ public class WaitingService {
         ReservationTime reservationTime = getReservationTimeFromRepository(timeId);
         Theme theme = getThemeFromRepository(themeId);
 
-        List<Waiting> waitings = waitingRepository.findByScheduleOrderByCreatedAt(new Schedule(date, reservationTime, theme));
-        if(waitings.isEmpty()) {
+        Optional<Waiting> topWaiting = waitingRepository.findTopByScheduleOrderByCreatedAt(new Schedule(date, reservationTime, theme));
+        if(topWaiting.isEmpty()) {
             return;
         }
-        approve(waitings.getFirst().getId());
+        approve(topWaiting.get().getId());
     }
 
     @Transactional

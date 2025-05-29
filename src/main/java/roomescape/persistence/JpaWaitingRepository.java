@@ -7,6 +7,7 @@ import roomescape.domain.Waiting;
 import roomescape.domain.WaitingWithRank;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
@@ -26,5 +27,5 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
     boolean existsByMemberIdAndSchedule(Long memberId, Schedule schedule);
 
-    List<Waiting> findByScheduleOrderByCreatedAt(Schedule schedule);
+    Optional<Waiting> findTopByScheduleOrderByCreatedAt(Schedule schedule);
 }

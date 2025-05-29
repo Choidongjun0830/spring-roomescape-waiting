@@ -33,7 +33,6 @@ public class Waiting {
         this.id = id;
         this.member = member;
         this.schedule = schedule;
-
     }
 
     public static Waiting createNew(Member member, LocalDate date, ReservationTime time, Theme theme) {

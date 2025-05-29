@@ -50,6 +50,7 @@ class WaitingControllerTest {
 
     private MemberResult memberResult;
     private Cookie authCookie;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -102,7 +103,6 @@ class WaitingControllerTest {
         WaitingResult waitingResult = TestFixture.createDefaultWaitingResult();
         when(waitingService.create(any(CreateWaitingParam.class)))
                 .thenReturn(waitingResult);
-
         //when & then
         mockMvc.perform(post("/waitings")
                 .cookie(authCookie)
